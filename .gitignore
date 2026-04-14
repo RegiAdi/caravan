@@ -1,0 +1,5 @@
+build/
+.zed/
+.cache/
+
+CMakeUserPresets.json
