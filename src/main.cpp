@@ -1,4 +1,6 @@
+#include <glad/glad.h>
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_opengl.h>
 #include <iostream>
 
 int main(int argc, char* argv[]) {
@@ -7,11 +9,17 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
     SDL_Window* window = SDL_CreateWindow(
-        "SDL3 Test",
-        800,
-        600,
-        0
+        "GL 3.3",
+        1280,
+        720,
+        SDL_WINDOW_OPENGL
     );
 
     if (!window) {
@@ -20,10 +28,14 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    SDL_RenderClear(renderer);
-    SDL_RenderPresent(renderer);
+    SDL_GLContext context = SDL_GL_CreateContext(window);
+
+    if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
+        std::cerr << "Glad failed to load OpenGL\n";
+        return -1;
+    }
+
+    std::cout << "OpenGL " << glGetString(GL_VERSION) << "\n";
 
     bool running = true;
     SDL_Event event;
@@ -33,10 +45,12 @@ int main(int argc, char* argv[]) {
                 running = false;
             }
         }
-        SDL_Delay(10);
+        glClearColor(0.5f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        SDL_GL_SwapWindow(window);
     }
 
-    SDL_DestroyRenderer(renderer);
+    SDL_GL_DestroyContext(context);
     SDL_DestroyWindow(window);
     SDL_Quit();
 
